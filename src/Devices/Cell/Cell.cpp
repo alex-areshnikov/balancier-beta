@@ -6,6 +6,7 @@ Cell::Cell(const uint8_t voltagePin, const uint8_t controlPin) {
 	this->voltagePin = voltagePin;
 	controller = new CellController(controlPin);
 	voltage = 0;
+	processedVoltage = 0.0;
 	
 	for(size_t i=0; i<HISTORY_SIZE; i++) prevReadings[i] = 0;
 };
@@ -15,12 +16,17 @@ void Cell::process(float balancingVoltage) {
 	prevReadings[HISTORY_SIZE-1] = analogRead(voltagePin);
 
 	setVoltage();
-	controller->setVoltage(voltage);
+	controller->setVoltage(processedVoltage);
 	controller->balanceTo(balancingVoltage);
+	controller->process();
 };
 
 int Cell::getVoltage() {
 	return(voltage);
+}
+
+void Cell::setProcessedVoltage(float processedVoltage) {
+	this->processedVoltage = processedVoltage;
 }
 
 // private

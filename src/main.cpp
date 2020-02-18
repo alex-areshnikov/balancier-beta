@@ -102,7 +102,7 @@ void printVoltages() {
   Serial.print(bank.totalVoltage());
   Serial.print("v/");
   Serial.print(bank.getBalancingVoltage());
-  Serial.print("v/] ");
+  Serial.print("v] ");
 
   for(int i=0; i<6; i++) {        
     Serial.print(voltages[i]);
@@ -125,8 +125,8 @@ void loop() {
   bank.process();
 
   printVoltages();
-  processSelect();
-  processState();
+  // processSelect();
+  // processState();
   
   delay(100);
 }

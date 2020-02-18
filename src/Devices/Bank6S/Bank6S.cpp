@@ -20,6 +20,7 @@ void Bank6S::process() {
 
 	for(size_t i=0; i<BANK_SIZE; i++) {
 		cells[i]->process(balancier->getBalancingVoltage());
+		cells[i]->setProcessedVoltage(voltages[i]);
 		rawVoltages[i] = cells[i]->getVoltage();
 	}
 	
@@ -47,7 +48,7 @@ float Bank6S::getBalancingVoltage() {
 };
 
 float Bank6S::totalVoltage() {
-	return convertedVoltages[BANK_SIZE-1];
+	return restoredVoltages[BANK_SIZE-1];
 }
 
 // private
@@ -60,7 +61,7 @@ void Bank6S::convertVoltages() {
 };
 
 void Bank6S::deaccumulateVoltages() {
-	voltages[0] = convertedVoltages[0];
+	voltages[0] = restoredVoltages[0];
 
 	for(size_t i=1; i<BANK_SIZE; i++) {
 		voltages[i] = restoredVoltages[i] - restoredVoltages[i-1];
