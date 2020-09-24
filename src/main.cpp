@@ -10,11 +10,16 @@
 #define S6 6
 #define S_ALL 7
 
+#define POWER_PIN 8
+#define REM_READ_PIN A0
+
 
 int balancierPins[] = {7,2,3,4,5,6};
-int powerPin = 8;
 int selectButton = A7;
 bool selectButtonPressed = false;
+bool remOn = true;
+int remCounter = 0;
+
 
 const uint8_t voltagePins[] = {A1, A2, A3, A4, A5, A6};
 const uint8_t controlPins[] = {7, 2, 3, 4, 5, 6};
@@ -29,8 +34,10 @@ void initializeBoard() {
     pinMode(balancierPins[i], OUTPUT);
   }
 
-  pinMode(powerPin, OUTPUT);
-  digitalWrite(powerPin, HIGH);  
+  pinMode(POWER_PIN, OUTPUT);
+  digitalWrite(POWER_PIN, HIGH);  
+
+  analogReference(EXTERNAL);
 }
 
 void balancierLedsCheck() {
@@ -93,12 +100,41 @@ void processSelect() {
   if(++sState > S_ALL) sState = NOTHING;  
 }
 
+void processInput() {
+  while(Serial.available()) {
+    char inputChar = toupper(Serial.read());
+    int inputDigit = inputChar-48;
+    
+    if(inputDigit > 0 && inputDigit <= 6) {
+      inputChar = toupper(Serial.read());
+
+      if(inputChar == 'O') {
+        digitalWrite(balancierPins[inputDigit-1], HIGH); 
+      } else {
+        digitalWrite(balancierPins[inputDigit-1], LOW); 
+      }
+    }
+  }
+}
+
+void processPowerControl() {
+  int pinRead = analogRead(REM_READ_PIN);
+
+  remOn = pinRead > 1000;
+
+  if(!remOn) remCounter++;
+
+  if(remCounter > 30) digitalWrite(POWER_PIN, LOW); //shutdown
+}
+
 void printVoltages() {
   if(!bank.isVoltagesChanged()) return;
 
   float* voltages = bank.getVoltages();
 
-  Serial.print("\nVoltages[");
+  Serial.print("\nREM[");
+  Serial.print(remOn ? "ON" : "OFF");
+  Serial.print("] Voltages[");
   Serial.print(bank.totalVoltage());
   Serial.print("v/");
   Serial.print(bank.getBalancingVoltage());
@@ -127,6 +163,8 @@ void loop() {
   printVoltages();
   // processSelect();
   // processState();
+  // processInput();
+  processPowerControl();
   
   delay(100);
 }

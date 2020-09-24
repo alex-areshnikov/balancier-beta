@@ -1,8 +1,8 @@
 #include "Bank6S.h"
 
-const float Bank6S::IN_RESISTORS_OHMS[] = { 0, 5.1, 5.1, 9.925, 9.979, 14.789 };
-const float Bank6S::OUT_RESISTORS_OHMS[] = { 5.1, 5.1, 5.1, 5.1, 5.1, 5.1 };
-const float Bank6S::REF_VOLTAGE = 5;
+const float Bank6S::IN_RESISTORS_OHMS[]  = { 0.0,  10.0, 13.65, 9.95, 9.9, 7.5 };
+const float Bank6S::OUT_RESISTORS_OHMS[] = { 20.0, 20.0, 10.0, 4.75, 3.24, 2.2 };
+const float Bank6S::REF_VOLTAGE = 4.094;
 
 Bank6S::Bank6S(const uint8_t voltagePins[], const uint8_t controlPins[]) {	
 	balancier = new Balancier();
@@ -55,7 +55,7 @@ float Bank6S::totalVoltage() {
 
 void Bank6S::convertVoltages() {
 	for(size_t i=0; i<BANK_SIZE; i++) {
-		convertedVoltages[i] = rawVoltages[i] * REF_VOLTAGE / 1024;
+		convertedVoltages[i] = rawVoltages[i] * REF_VOLTAGE / 1023;
     restoredVoltages[i] = (convertedVoltages[i] * (IN_RESISTORS_OHMS[i] + OUT_RESISTORS_OHMS[i])) / OUT_RESISTORS_OHMS[i];
 	}
 };

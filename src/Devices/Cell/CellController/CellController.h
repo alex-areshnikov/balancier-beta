@@ -3,7 +3,7 @@
 
 class CellController {
 		const uint8_t NONE = -1;
-		const uint8_t MIN_BALANCING_DURATION_SECONDS = 60;
+		const uint8_t MIN_BALANCING_DURATION_SECONDS = 30;
 
 		Timer *timer;
 		uint8_t controlPin;
