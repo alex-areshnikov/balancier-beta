@@ -4,21 +4,17 @@ const int Cell::HISTORY_SIZE = 10;
 
 Cell::Cell(const uint8_t voltagePin, const uint8_t controlPin) {
 	this->voltagePin = voltagePin;
-	controller = new CellController(controlPin);
+	this->controlPin = controlPin;
 	voltage = 0;
-	processedVoltage = 0.0;
 	
 	for(size_t i=0; i<HISTORY_SIZE; i++) prevReadings[i] = 0;
 };
 
-void Cell::process(float balancingVoltage) {
+void Cell::process() {
 	for(size_t i=1; i<HISTORY_SIZE; i++) prevReadings[i-1] = prevReadings[i];
 	prevReadings[HISTORY_SIZE-1] = analogRead(voltagePin);
 
 	setVoltage();
-	controller->setVoltage(processedVoltage);
-	controller->balanceTo(balancingVoltage);
-	controller->process();
 };
 
 int Cell::getVoltage() {
@@ -27,6 +23,16 @@ int Cell::getVoltage() {
 
 void Cell::setProcessedVoltage(float processedVoltage) {
 	this->processedVoltage = processedVoltage;
+}
+
+void Cell::balance(float balancingVoltage) {
+	if(processedVoltage > balancingVoltage) {
+		digitalWrite(controlPin, HIGH);
+	}
+}
+
+void Cell::stopBalance() {
+	digitalWrite(controlPin, LOW);
 }
 
 // private

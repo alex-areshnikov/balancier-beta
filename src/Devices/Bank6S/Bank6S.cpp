@@ -13,13 +13,13 @@ Bank6S::Bank6S(const uint8_t voltagePins[], const uint8_t controlPins[]) {
 	}
 };
 
-void Bank6S::process() {
+void Bank6S::processVoltages() {
 	for(size_t i=0; i<BANK_SIZE; i++) {
 		prevVoltages[i] = rawVoltages[i];
 	}	
 
 	for(size_t i=0; i<BANK_SIZE; i++) {
-		cells[i]->process(balancier->getBalancingVoltage());
+		cells[i]->process();
 		cells[i]->setProcessedVoltage(voltages[i]);
 		rawVoltages[i] = cells[i]->getVoltage();
 	}
@@ -27,9 +27,23 @@ void Bank6S::process() {
 	if(isVoltagesChanged()) {
 		convertVoltages();
 		deaccumulateVoltages();
-		balancier->process(voltages);
 	}
 };
+
+void Bank6S::startBalancingRoutine() {
+	balancier->process(voltages);
+	float balancingVoltage = balancier->getBalancingVoltage();
+
+	for(size_t i=0; i<BANK_SIZE; i++) {
+		cells[i]->balance(balancingVoltage);
+	}
+}
+
+void Bank6S::stopBalancingRoutine() {
+	for(size_t i=0; i<BANK_SIZE; i++) {
+		cells[i]->stopBalance();
+	}
+}
 
 bool Bank6S::isVoltagesChanged() {
 	for(size_t i=0; i<BANK_SIZE; i++) {

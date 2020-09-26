@@ -7,7 +7,7 @@ Balancier::Balancier() {
 
 float Balancier::getBalancingVoltage() {
 	//return balancingVoltage;
-	return 5;
+	return 2.3;
 };
 
 void Balancier::process(float voltages[]) {

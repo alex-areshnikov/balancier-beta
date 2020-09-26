@@ -8,15 +8,17 @@ class Cell {
 		static const int HISTORY_SIZE;
 
 		int prevReadings[10];
-		int voltagePin;
-		CellController *controller;
+		uint8_t voltagePin;
+		uint8_t controlPin;
 		int voltage;
 		float processedVoltage;
 
 		void setVoltage();
 	public:
 		Cell(const uint8_t, const uint8_t);
-		void process(float);
+		void process();
+		void balance(float);
+		void stopBalance();
 		int getVoltage();
 		void setProcessedVoltage(float);
 };

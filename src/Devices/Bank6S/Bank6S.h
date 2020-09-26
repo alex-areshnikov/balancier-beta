@@ -25,7 +25,9 @@ class Bank6S {
 	public:
 		Bank6S(const uint8_t[], const uint8_t[]);
 
-		void process();
+		void processVoltages();
+		void startBalancingRoutine();
+		void stopBalancingRoutine();
 		bool isVoltagesChanged();
 		float* getVoltages();
 		float totalVoltage();

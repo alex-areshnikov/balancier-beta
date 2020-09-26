@@ -13,7 +13,6 @@
 #define POWER_PIN 8
 #define REM_READ_PIN A0
 
-
 int balancierPins[] = {7,2,3,4,5,6};
 int selectButton = A7;
 bool selectButtonPressed = false;
@@ -27,7 +26,39 @@ Bank6S bank(voltagePins, controlPins);
 
 int sState;
 
+volatile bool balancingStart = false;
+volatile bool balancingStop = false;
+volatile bool reportVoltages = false;
+
+const uint16_t blalncingDurationSeconds = 300;
+const uint8_t blalncingRestSeconds = 2;
+
+volatile uint16_t secondsCounter = blalncingDurationSeconds - 2;
+
+void initializeSecondsTimer() {
+  // Reset Timer 3 Reg A
+  TCCR3A = 0;
+
+  // Set prescaler 1024
+  TCCR3B |= (1 << CS12);
+  TCCR3B &= ~(1 << CS11);
+  TCCR3B |= (1 << CS10);
+
+  // Set timer value 0
+  TCNT3 = 0;
+
+  // Set compare value. 1 second at 1024 prescaler
+  OCR3A = 15625;
+
+  // Enable compare interrupt
+  TIMSK3 = (1 << OCIE3A);
+
+  // Enable global interrupts
+  sei();
+}
+
 void initializeBoard() {
+  initializeSecondsTimer();
   Serial.begin(115200);
     
   for(int i=0; i<6; i++) {
@@ -157,14 +188,46 @@ void setup() {
   Serial.println("Initialized");
 }
 
-void loop() {  
-  bank.process();
+void processFlags() {
+  if(balancingStart) {
+    balancingStart = false;
+    bank.startBalancingRoutine();
+  }
 
-  printVoltages();
+  if(balancingStop) {
+    balancingStop = false;
+    bank.stopBalancingRoutine();
+  }
+
+  if(reportVoltages) {
+    reportVoltages = false;
+    printVoltages();
+  }
+}
+
+void loop() {  
+  bank.processVoltages();
+
+  processFlags();
   // processSelect();
   // processState();
   // processInput();
   processPowerControl();
   
-  delay(100);
+  delay(30);
+}
+
+ISR(TIMER3_COMPA_vect) {  
+  if(++secondsCounter == blalncingDurationSeconds) {
+    balancingStop = true;
+  }
+
+  if(secondsCounter == (blalncingDurationSeconds + blalncingRestSeconds)) {
+    balancingStart = true;
+    secondsCounter = 0;
+  }
+
+  reportVoltages = true;
+
+  TCNT3 = 0;
 }
