@@ -20,6 +20,8 @@ class Bank6S {
 		float restoredVoltages[BANK_SIZE];
 		float voltages[BANK_SIZE];
 
+		bool balancing;
+
 		void convertVoltages();
 		void deaccumulateVoltages();
 	public:
@@ -29,6 +31,7 @@ class Bank6S {
 		void startBalancingRoutine();
 		void stopBalancingRoutine();
 		bool isVoltagesChanged();
+		bool isBalancing();
 		float* getVoltages();
 		float totalVoltage();
 		float getBalancingVoltage();

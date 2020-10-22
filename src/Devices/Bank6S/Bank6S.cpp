@@ -6,6 +6,7 @@ const float Bank6S::REF_VOLTAGE = 4.094;
 
 Bank6S::Bank6S(const uint8_t voltagePins[], const uint8_t controlPins[]) {	
 	balancier = new Balancier();
+	balancing = false;
 
 	for(size_t i=0; i<BANK_SIZE; ++i) {
 		cells[i] = new Cell(voltagePins[i], controlPins[i]);
@@ -35,11 +36,13 @@ void Bank6S::startBalancingRoutine() {
 	float balancingVoltage = balancier->getBalancingVoltage();
 
 	for(size_t i=0; i<BANK_SIZE; i++) {
-		cells[i]->balance(balancingVoltage);
+		if(cells[i]->balance(balancingVoltage)) balancing = true;
 	}
 }
 
 void Bank6S::stopBalancingRoutine() {
+	balancing = false;
+
 	for(size_t i=0; i<BANK_SIZE; i++) {
 		cells[i]->stopBalance();
 	}
@@ -51,6 +54,10 @@ bool Bank6S::isVoltagesChanged() {
 	}
 
 	return false;
+};
+
+bool Bank6S::isBalancing() {
+	return balancing;
 };
 
 float* Bank6S::getVoltages() {

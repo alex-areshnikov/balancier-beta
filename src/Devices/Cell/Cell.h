@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <math.h>
 
-#include "CellController/CellController.h"
-
 class Cell {
 	private:
 		static const int HISTORY_SIZE;
@@ -10,14 +8,14 @@ class Cell {
 		int prevReadings[10];
 		uint8_t voltagePin;
 		uint8_t controlPin;
-		int voltage;
+		int rawVoltage;
 		float processedVoltage;
 
 		void setVoltage();
 	public:
 		Cell(const uint8_t, const uint8_t);
 		void process();
-		void balance(float);
+		bool balance(float);
 		void stopBalance();
 		int getVoltage();
 		void setProcessedVoltage(float);

@@ -6,8 +6,7 @@ Balancier::Balancier() {
 };
 
 float Balancier::getBalancingVoltage() {
-	//return balancingVoltage;
-	return 2.3;
+	return balancingVoltage;
 };
 
 void Balancier::process(float voltages[]) {
@@ -17,6 +16,9 @@ void Balancier::process(float voltages[]) {
 			break;
 		case MINIMAL_CELL_VOLTAGE_MODE:
 			calcMinCell(voltages);
+			break;
+		case FIXED_VOLTAGE_MODE:
+			balancingVoltage = FIXED_VOLTAGE_TARGET;
 			break;
 		default:
 			// should not be here
@@ -40,4 +42,6 @@ void Balancier::calcMinCell(float voltages[]) {
 	for(int i=0; i<6; i++) {
 		if(voltages[i] < balancingVoltage) balancingVoltage = voltages[i];
 	}
+
+	balancingVoltage += MINIMAL_CELL_VOLTAGE_ALLOWED_GAP;
 };

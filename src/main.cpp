@@ -30,8 +30,11 @@ volatile bool balancingStart = false;
 volatile bool balancingStop = false;
 volatile bool reportVoltages = false;
 
+bool readyToShutDown = true;
+
 const uint16_t blalncingDurationSeconds = 300;
 const uint8_t blalncingRestSeconds = 2;
+const uint8_t blalncingIdleSeconds = 10;
 
 volatile uint16_t secondsCounter = blalncingDurationSeconds - 2;
 
@@ -149,17 +152,16 @@ void processInput() {
 }
 
 void processPowerControl() {
-  int pinRead = analogRead(REM_READ_PIN);
+  if(!readyToShutDown) return;
 
-  remOn = pinRead > 1000;
+  remOn = analogRead(REM_READ_PIN) > 1000;
+  if(remOn && remCounter > 0) remCounter = 0;
 
-  if(!remOn) remCounter++;
-
-  if(remCounter > 30) digitalWrite(POWER_PIN, LOW); //shutdown
+  if(remCounter > 5) digitalWrite(POWER_PIN, LOW); //shutdown
 }
 
 void printVoltages() {
-  if(!bank.isVoltagesChanged()) return;
+  // if(!bank.isVoltagesChanged()) return;
 
   float* voltages = bank.getVoltages();
 
@@ -192,9 +194,16 @@ void processFlags() {
   if(balancingStart) {
     balancingStart = false;
     bank.startBalancingRoutine();
+
+    if(bank.isBalancing()) {
+      readyToShutDown = false;
+    } else {
+      secondsCounter = blalncingDurationSeconds - blalncingIdleSeconds;
+    }
   }
 
   if(balancingStop) {
+    readyToShutDown = true;
     balancingStop = false;
     bank.stopBalancingRoutine();
   }
@@ -226,6 +235,8 @@ ISR(TIMER3_COMPA_vect) {
     balancingStart = true;
     secondsCounter = 0;
   }
+
+  if(!remOn) remCounter++;
 
   reportVoltages = true;
 
