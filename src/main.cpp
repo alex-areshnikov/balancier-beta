@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Devices/Bank6S/Bank6S.h"
+#include "Services/LedsChecker/LedsChecker.h"
 
 #define SERIAL_PRINT_VOLTAGES true
 
@@ -70,32 +71,6 @@ void initializeBoard() {
   analogReference(EXTERNAL);
 }
 
-void balancierLedsCheck() {
-  for(int i=0; i<6; i++) {
-    digitalWrite(controlPins[i], HIGH);   
-    delay(50);                    
-    digitalWrite(controlPins[i], LOW);   
-  }
-
-  for(int i=5; i>=0; i--) {
-    digitalWrite(controlPins[i], HIGH);   
-    delay(50);                    
-    digitalWrite(controlPins[i], LOW);   
-  }
-
-  delay(50);
-
-  for(int i=0; i<6; i++) {
-    digitalWrite(controlPins[i], HIGH);      
-  }
-  
-  delay(500);                   
-  
-  for(int i=0; i<6; i++) {
-    digitalWrite(controlPins[i], LOW);      
-  }
-}
-
 void processManualPinEnable() {
   while(Serial.available()) {
     char inputChar = toupper(Serial.read());
@@ -149,7 +124,9 @@ void printVoltages() {
 
 void setup() {
   initializeBoard();
-  balancierLedsCheck();
+    
+  LedsChecker *ledsChecker = new LedsChecker();
+  ledsChecker->call(controlPins);
 
   delay(1000);
 
