@@ -1,12 +1,12 @@
 #include "Balancier.h"
 
 Balancier::Balancier() {
-	mode = MINIMAL_CELL_VOLTAGE_MODE;
+	mode = AVERAGE_CELL_VOLTAGE_MODE;
 	balancingVoltage = 99.99;
 };
 
 float Balancier::getBalancingVoltage() {
-	return balancingVoltage;
+	return balancingVoltage;	
 };
 
 void Balancier::process(float voltages[]) {
@@ -34,6 +34,7 @@ void Balancier::calcAvgCell(float voltages[]) {
 	}
 
 	balancingVoltage /= 6;
+	balancingVoltage += CELL_VOLTAGE_ALLOWED_GAP;
 };
 
 void Balancier::calcMinCell(float voltages[]) {
@@ -43,5 +44,5 @@ void Balancier::calcMinCell(float voltages[]) {
 		if(voltages[i] < balancingVoltage) balancingVoltage = voltages[i];
 	}
 
-	balancingVoltage += MINIMAL_CELL_VOLTAGE_ALLOWED_GAP;
+	balancingVoltage += CELL_VOLTAGE_ALLOWED_GAP;
 };

@@ -11,7 +11,7 @@ class Balancier {
 		static const uint8_t FIXED_VOLTAGE_MODE = 0x3;
 
 		const float FIXED_VOLTAGE_TARGET = 2.5;
-		const float MINIMAL_CELL_VOLTAGE_ALLOWED_GAP = 0.05;
+		const float CELL_VOLTAGE_ALLOWED_GAP = 0.05;
 
 		Balancier();
 		void process(float[]);
