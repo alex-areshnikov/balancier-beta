@@ -1,8 +1,11 @@
 #include <Arduino.h>
+
 #include "Devices/Bank6S/Bank6S.h"
+#include "Devices/Screen/Screen.h"
 #include "Services/LedsChecker/LedsChecker.h"
 
 #define SERIAL_PRINT_VOLTAGES true
+#define SCREEN_ENABLE false
 
 #define NOTHING 0
 #define S1 1
@@ -35,23 +38,25 @@ const uint8_t blalncingIdleSeconds = 10;
 
 volatile uint16_t secondsCounter = blalncingDurationSeconds - 2;
 
+Screen *screen;
+
 void initializeSecondsTimer() {
-  // Reset Timer 3 Reg A
-  TCCR3A = 0;
+  // Reset Timer 4 Reg A
+  TCCR4A = 0;
 
   // Set prescaler 1024
-  TCCR3B |= (1 << CS12);
-  TCCR3B &= ~(1 << CS11);
-  TCCR3B |= (1 << CS10);
+  TCCR4B |= (1 << CS12);
+  TCCR4B &= ~(1 << CS11);
+  TCCR4B |= (1 << CS10);
 
   // Set timer value 0
-  TCNT3 = 0;
+  TCNT4 = 0;
 
   // Set compare value. 1 second at 1024 prescaler
-  OCR3A = 15625;
+  OCR4A = 15625;
 
   // Enable compare interrupt
-  TIMSK3 = (1 << OCIE3A);
+  TIMSK4 = (1 << OCIE4A);
 
   // Enable global interrupts
   sei();
@@ -69,6 +74,11 @@ void initializeBoard() {
   digitalWrite(POWER_PIN, HIGH);  
 
   analogReference(EXTERNAL);
+
+  if(SCREEN_ENABLE) {
+    // screen = new Screen(&display);
+    // screen->initialize();
+  }
 }
 
 void processManualPinEnable() {
@@ -122,15 +132,9 @@ void printVoltages() {
   }
 }
 
-void setup() {
-  initializeBoard();
-    
-  LedsChecker *ledsChecker = new LedsChecker();
-  ledsChecker->call(controlPins);
-
-  delay(1000);
-
-  Serial.println("Initialized");
+void updateScreen() {
+  Serial.println("Screen render");
+  screen->setVoltages(bank.getVoltages());
 }
 
 void processFlags() {
@@ -156,7 +160,17 @@ void processFlags() {
   if(reportVoltages) {
     reportVoltages = false;
     if(SERIAL_PRINT_VOLTAGES) printVoltages();
+    // if(SCREEN_ENABLE) updateScreen();
   }
+}
+
+void setup() {
+  initializeBoard();
+    
+  LedsChecker *ledsChecker = new LedsChecker();
+  ledsChecker->call(controlPins);
+
+  Serial.println("Setup completed");
 }
 
 void loop() {  
@@ -169,7 +183,7 @@ void loop() {
   delay(30);
 }
 
-ISR(TIMER3_COMPA_vect) {  
+ISR(TIMER4_COMPA_vect) {  
   if(++secondsCounter == blalncingDurationSeconds) {
     balancingStop = true;
   }
@@ -183,5 +197,5 @@ ISR(TIMER3_COMPA_vect) {
 
   reportVoltages = true;
 
-  TCNT3 = 0;
+  TCNT4 = 0;
 }
