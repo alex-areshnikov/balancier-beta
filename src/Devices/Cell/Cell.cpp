@@ -1,7 +1,5 @@
 #include "Cell.h"
 
-const int Cell::HISTORY_SIZE = 10;
-
 Cell::Cell(const uint8_t voltagePin, const uint8_t controlPin) {
 	this->voltagePin = voltagePin;
 	this->controlPin = controlPin;
@@ -17,7 +15,7 @@ void Cell::process() {
 	setVoltage();
 };
 
-int Cell::getVoltage() {
+int Cell::getRawVoltage() {
 	return(rawVoltage);
 }
 

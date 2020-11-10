@@ -3,7 +3,7 @@
 
 class Cell {
 	private:
-		static const int HISTORY_SIZE;
+		static const int HISTORY_SIZE = 10;
 
 		int prevReadings[10];
 		uint8_t voltagePin;
@@ -17,6 +17,6 @@ class Cell {
 		void process();
 		bool balance(float);
 		void stopBalance();
-		int getVoltage();
+		int getRawVoltage();
 		void setProcessedVoltage(float);
 };

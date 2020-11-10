@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "../Cell/Cell.h"
 #include "../Balancier/Balancier.h"
+#include "../../Services/BankVoltage/BankVoltage.h"
 
 class Bank6S {
 	private:
@@ -13,12 +14,7 @@ class Bank6S {
 		uint8_t cellPins[BANK_SIZE];
 		Cell *cells[BANK_SIZE];
 		Balancier *balancier;
-		
-		float prevVoltages[BANK_SIZE];
-		float rawVoltages[BANK_SIZE];
-		float convertedVoltages[BANK_SIZE];
-		float restoredVoltages[BANK_SIZE];
-		float voltages[BANK_SIZE];
+		BankVoltage *bankVoltage;
 
 		bool balancing;
 
@@ -30,9 +26,8 @@ class Bank6S {
 		void processVoltages();
 		void startBalancingRoutine();
 		void stopBalancingRoutine();
-		bool isVoltagesChanged();
-		bool isBalancing();
+		bool isBalancing();	
 		float* getVoltages();
-		float totalVoltage();
+		float totalVoltage();	
 		float getBalancingVoltage();
 };

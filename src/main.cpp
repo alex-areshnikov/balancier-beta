@@ -134,7 +134,7 @@ void printVoltages() {
 
 void updateScreen() {
   Serial.println("Screen render");
-  screen->setVoltages(bank.getVoltages());
+  // screen->setVoltages(bank.getVoltages());
 }
 
 void processFlags() {
