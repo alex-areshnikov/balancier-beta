@@ -15,7 +15,7 @@ void Bank6S::processVoltages() {
 	for(size_t i=0; i<BANK_SIZE; i++) {
 		cells[i]->process();
 		bankVoltage->sUpdate(i, cells[i]->getRawVoltage());
-		cells[i]->setProcessedVoltage(bankVoltage->s(i));		
+		cells[i]->setProcessedVoltage(bankVoltage->s(i));				
 	}
 };
 

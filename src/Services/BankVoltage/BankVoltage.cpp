@@ -1,5 +1,9 @@
 #include "BankVoltage.h"
 
+const float BankVoltage::IN_RESISTORS_OHMS[]  = { 0.0,  10.0, 13.75, 10.0, 10.0, 7.5 };
+const float BankVoltage::OUT_RESISTORS_OHMS[] = { 20.0, 20.0, 10.0, 4.75, 3.24, 2.2 };
+const float BankVoltage::REF_VOLTAGE = 4.094;
+
 BankVoltage::BankVoltage() {
 	for(uint8_t i=0; i<BANK_SIZE; i++) {
         rawVoltages[i] = 0;
@@ -17,6 +21,9 @@ void BankVoltage::update(float rawVoltages[]) {
 void BankVoltage::sUpdate(uint8_t index, float rawVoltage) {
     previousRawVoltages[index] = rawVoltages[index];
     rawVoltages[index] = rawVoltage;
+
+    convert();
+    deaccumulate();
 }
 
 float BankVoltage::s(uint8_t index) {

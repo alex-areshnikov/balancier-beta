@@ -4,8 +4,11 @@
 #include "Devices/Screen/Screen.h"
 #include "Services/LedsChecker/LedsChecker.h"
 
-#define SERIAL_PRINT_VOLTAGES true
-#define SCREEN_ENABLE false
+#include "ssd1306.h"
+#include "nano_gfx.h"
+
+#define SERIAL_PRINT_VOLTAGES false
+#define SCREEN_ENABLE true
 
 #define NOTHING 0
 #define S1 1
@@ -26,7 +29,11 @@ bool readyToShutDown = true;
 
 const uint8_t voltagePins[] = {A1, A2, A3, A0, A7, A6};
 const uint8_t controlPins[] = {7, 23, 3, 4, 5, 6};
+
 Bank6S bank(voltagePins, controlPins);
+
+const uint8_t screenSXOffsets[6] = {0, 48, 96, 0, 48, 96};
+const uint8_t screenSYOffsets[6] = {16, 16, 16, 32, 32, 32};
 
 volatile bool balancingStart = false;
 volatile bool balancingStop = false;
@@ -36,7 +43,7 @@ const uint16_t blalncingDurationSeconds = 300;
 const uint8_t blalncingRestSeconds = 2;
 const uint8_t blalncingIdleSeconds = 10;
 
-volatile uint16_t secondsCounter = blalncingDurationSeconds - 2;
+volatile uint16_t secondsCounter = blalncingDurationSeconds - 5;
 
 Screen *screen;
 
@@ -60,12 +67,16 @@ void initializeSecondsTimer() {
 
   // Enable global interrupts
   sei();
+
+  Serial.println("TIMER4 initialized");
 }
 
-void initializeBoard() {
-  initializeSecondsTimer();
+void initializeSerial() {
   Serial.begin(115200);
-    
+  Serial.println("Serial initialized");
+}
+
+void initializePins() {
   for(int i=0; i<6; i++) {
     pinMode(controlPins[i], OUTPUT);
   }
@@ -73,12 +84,26 @@ void initializeBoard() {
   pinMode(POWER_PIN, OUTPUT);
   digitalWrite(POWER_PIN, HIGH);  
 
-  analogReference(EXTERNAL);
+  Serial.println("PINs initialized");
+}
 
-  if(SCREEN_ENABLE) {
-    // screen = new Screen(&display);
-    // screen->initialize();
-  }
+void initializeScreen() {
+  if(SCREEN_ENABLE) {      
+      ssd1306_setFixedFont(ssd1306xled_font6x8);
+      ssd1306_128x64_i2c_init();
+      ssd1306_clearScreen();    
+
+      Serial.println("Screen initialized");
+    }
+}
+
+void initializeBoard() {
+  initializeSerial();
+  initializeSecondsTimer();    
+  initializePins();
+  initializeScreen();
+
+  analogReference(EXTERNAL);  
 }
 
 void processManualPinEnable() {
@@ -113,6 +138,21 @@ void processPowerControl() {
   if(remCounter > 5) digitalWrite(POWER_PIN, LOW); //shutdown
 }
 
+void screenPrintVoltage(float voltage, uint8_t offsetX, uint8_t offsetY) {
+    char charBuffer[16];    
+    String(voltage, 2).toCharArray(charBuffer, sizeof(charBuffer));
+    sprintf(charBuffer, "%sv", charBuffer);
+    ssd1306_printFixed(offsetX,  offsetY, charBuffer, STYLE_NORMAL);
+}
+
+void screenPrintTotalVoltage(float voltage) {
+    screenPrintVoltage(voltage, 0, 0);
+}
+
+void screenPrintBalancingVoltage(float voltage) {
+    screenPrintVoltage(voltage, 80, 0);
+}
+
 void printVoltages() {
   // if(!bank.isVoltagesChanged()) return;
 
@@ -133,8 +173,14 @@ void printVoltages() {
 }
 
 void updateScreen() {
-  Serial.println("Screen render");
-  // screen->setVoltages(bank.getVoltages());
+  float* voltages = bank.getVoltages();
+
+  screenPrintTotalVoltage(bank.totalVoltage());
+  screenPrintBalancingVoltage(bank.getBalancingVoltage());
+
+  for(int i=0; i<6; i++) {        
+    screenPrintVoltage(voltages[i], screenSXOffsets[i], screenSYOffsets[i]);
+  }
 }
 
 void processFlags() {
@@ -160,7 +206,7 @@ void processFlags() {
   if(reportVoltages) {
     reportVoltages = false;
     if(SERIAL_PRINT_VOLTAGES) printVoltages();
-    // if(SCREEN_ENABLE) updateScreen();
+    if(SCREEN_ENABLE) updateScreen();
   }
 }
 

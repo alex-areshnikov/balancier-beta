@@ -2,7 +2,7 @@
 
 Balancier::Balancier() {
 	mode = AVERAGE_CELL_VOLTAGE_MODE;
-	balancingVoltage = 99.99;
+	balancingVoltage = 9.99;
 };
 
 float Balancier::getBalancingVoltage() {

@@ -2,23 +2,24 @@
 #define Included_Screen_H
 
 #include <Arduino.h>
-#include <Adafruit_SSD1306.h>
+#include <Wire.h>
+#include <SPI.h>
+#include "nano_gfx.h"
 
 class Screen {
 	private:
-        static const uint8_t BANK_SIZE = 6;       
+                static const uint8_t BANK_SIZE = 6;    
 
-        Adafruit_SSD1306 *display;
+                NanoCanvas *canvas;
+                float *voltages;
+                
+                void renderVoltages();
 
-        float *voltages;
-
-        void render();
-        void renderVoltages();
 	public:
-		Screen(Adafruit_SSD1306*);
-
-        void initialize();
-        void setVoltages(float[]);
+                Screen();
+                void initialize();
+                void setVoltages(float[]);
+                void render();
 };
 
 #endif
