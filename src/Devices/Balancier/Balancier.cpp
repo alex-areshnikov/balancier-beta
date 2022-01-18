@@ -1,7 +1,7 @@
 #include "Balancier.h"
 
 Balancier::Balancier() {
-	mode = AVERAGE_CELL_VOLTAGE_MODE;
+	mode = MINIMAL_CELL_VOLTAGE_MODE;
 	balancingVoltage = 9.99;
 };
 

@@ -43,7 +43,7 @@ const uint16_t blalncingDurationSeconds = 300;
 const uint8_t blalncingRestSeconds = 2;
 const uint8_t blalncingIdleSeconds = 10;
 
-volatile uint16_t secondsCounter = blalncingDurationSeconds - 5;
+volatile uint16_t secondsCounter = blalncingDurationSeconds - blalncingIdleSeconds;
 
 Screen *screen;
 
@@ -154,8 +154,6 @@ void screenPrintBalancingVoltage(float voltage) {
 }
 
 void printVoltages() {
-  // if(!bank.isVoltagesChanged()) return;
-
   float* voltages = bank.getVoltages();
 
   Serial.print("\nREM[");

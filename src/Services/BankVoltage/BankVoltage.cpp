@@ -1,6 +1,6 @@
 #include "BankVoltage.h"
 
-const float BankVoltage::IN_RESISTORS_OHMS[]  = { 0.0,  10.0, 13.75, 10.0, 10.0, 7.5 };
+const float BankVoltage::IN_RESISTORS_OHMS[]  = { 0.0,  10.0, 13.7, 10.0, 10.0, 7.5 };
 const float BankVoltage::OUT_RESISTORS_OHMS[] = { 20.0, 20.0, 10.0, 4.75, 3.24, 2.2 };
 const float BankVoltage::REF_VOLTAGE = 4.094;
 
